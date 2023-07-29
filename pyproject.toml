@@ -6,6 +6,7 @@ authors = ["tamir <tamirmandreev@mail.ru>"]
 
 [tool.poetry.dependencies]
 python = "^3.10"
+pytest = "^7.4.0"
 
 [tool.poetry.dev-dependencies]
 

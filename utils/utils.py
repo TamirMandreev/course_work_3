@@ -1,4 +1,10 @@
-import datetime
+import datetime, json
+
+def json_load():
+    path_to_json = '/home/tamir/PycharmProjects/course_work_3/json_data/user_data.json'
+    with open(path_to_json) as file:
+        data = json.load(file)
+    return data
 
 def get_5_last_transactions(data):
     new_data = []
@@ -19,33 +25,57 @@ def get_date_and_description(transaction):
     description = transaction['description']
 
     return f'{formatted_date} {description}'
-    
-def get_number_cart_were_transfer(transaction):
-    if 'from' in transaction:
-        cart_number = transaction['from'].split(' ')[-1]
-        from_cart_name = transaction['from'].split(' ')[-2::-1]
-        from_cart_name.reverse()
-        from_cart_name = ' '.join(from_cart_name)
 
-        to_cart_name = transaction['to'].split(' ')[-2::-1]
-        to_cart_name.reverse()
-        to_cart_name = ' '.join(to_cart_name)
 
-        masked_cart_namber = cart_number[0:4] + ' ' + cart_number[4:6] + 'XX' + ' ' + 'XXXX' + ' ' + 'XXXX' + ' ' + cart_number[16:]
-        account_number = transaction['to'].split(' ')[-1]
-        masked_account_number = account_number[0:4] + ' ' + account_number[4:6] + 'XX' + ' ' + 'XXXX' + ' ' + 'XXXX' + ' ' + account_number[16:]
+def get_transfer_from(transaction):
+    if 'from' in transaction and transaction['from'].startswith('Счет'):
+        card_info = transaction['from'].split(' ')
+        card_number = card_info[-1]
+        masked_cart_number = 'XX' + card_number[-4:]
+        card_info[-1] = masked_cart_number
+        hidden_card_info = ' '.join(card_info)
 
-        return f"{from_cart_name} {masked_cart_namber} -> {to_cart_name} {masked_account_number}"
+        return hidden_card_info
 
-    else:
-        to_cart_name = transaction['to'].split(' ')[-2::-1]
-        to_cart_name.reverse()
-        to_cart_name = ' '.join(to_cart_name)
+    elif 'from' in transaction and not transaction['from'].startswith('Счет'):
+        card_info = transaction['from'].split(' ')
+        cart_number = card_info[-1]
+        masked_cart_number = f'{cart_number[0:4]} {cart_number[4:6]} XX XXXX {cart_number[-4:]}'
+        card_info[-1] = masked_cart_number
+        hidden_card_info = ' '.join(card_info)
+        return hidden_card_info
 
-        account_number = transaction['to'].split(' ')[-1]
-        masked_account_number = account_number[0:4] + ' ' + account_number[4:6] + 'XX' + ' ' + 'XXXX' + ' ' + 'XXXX' + ' ' + account_number[16:]
+def get_transfer_to(transaction):
+    if 'to' in transaction and transaction['to'].startswith('Счет'):
+        card_info = transaction['to'].split(' ')
+        card_number = card_info[-1]
+        masked_cart_number = 'XX' + card_number[-4:]
+        card_info[-1] = masked_cart_number
+        hidden_card_info = ' '.join(card_info)
 
-        return f"{to_cart_name} {masked_account_number}"
+        return hidden_card_info
+
+    elif 'to' in transaction and not transaction['to'].startswith('Счет'):
+        card_info = transaction['to'].split(' ')
+        cart_number = card_info[-1]
+        masked_cart_number = f'{cart_number[0:4]} {cart_number[4:6]} XX XXXX {cart_number[-4:]}'
+        card_info[-1] = masked_cart_number
+        hidden_card_info = ' '.join(card_info)
+        return hidden_card_info
+
 
 def get_operation_amount(transaction):
     return f"{transaction['operationAmount']['amount']} {transaction['operationAmount']['currency']['code']}"
+
+def conclusion(data):
+    five_last_transactions = get_5_last_transactions(data)
+    for transaction in five_last_transactions:
+        print(get_date_and_description(transaction))
+        if get_transfer_from(transaction) == None:
+            print(get_transfer_to(transaction))
+        else:
+            print(f'{get_transfer_from(transaction)} -> {get_transfer_to(transaction)}')
+        print(get_operation_amount(transaction))
+        print()
+
+
