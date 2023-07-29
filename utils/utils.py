@@ -1,7 +1,6 @@
 import datetime, json
 
-def json_load():
-    path_to_json = '/home/tamir/PycharmProjects/course_work_3/json_data/user_data.json'
+def json_load(path_to_json):
     with open(path_to_json) as file:
         data = json.load(file)
     return data
